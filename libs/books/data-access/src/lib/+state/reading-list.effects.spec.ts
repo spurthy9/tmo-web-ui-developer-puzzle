@@ -112,4 +112,36 @@ describe('ReadingListEffects', () => {
       .expectOne(`/api/reading-list/${item.bookId}`)
       .flush(item, { status: 400, statusText: 'Cannot Delete Reading Item' });
   });
+  it('should mark as read', done => {
+    actions = new ReplaySubject();
+    const item = createReadingListItem('A');
+    actions.next(ReadingListActions.markAsRead({ item }));
+
+    effects.markAsRead$.subscribe(action => {
+      expect(action).toEqual(
+        ReadingListActions.confirmedMarkAsRead({
+          item
+        })
+      );
+      done();
+    });
+
+    httpMock.expectOne('/api/reading-list/A/finished').flush([]);
+  });
+
+  it('should invoke failedMarkAsRead action on fail of markAsRead action', done => {
+    actions = new ReplaySubject();
+    const item = createReadingListItem('A');
+    actions.next(ReadingListActions.markAsRead({ item }));
+
+    effects.markAsRead$.subscribe(action => {
+      expect(action).toEqual(
+        ReadingListActions.failedMarkAsRead({ item })
+      );
+      done();
+    });
+
+    httpMock.expectOne('/api/reading-list/A/finished').error(new ErrorEvent('Error'));
+  });
+
 });

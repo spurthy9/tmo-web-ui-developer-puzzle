@@ -42,4 +42,12 @@ describe('ReadingListComponent', () => {
     component.removeFromReadingList(book);
     expect(store.dispatch).toHaveBeenCalledWith(removeFromReadingList({ item: book }));
   });
+
+  it('should mark a book as read', () => {
+    const book: ReadingListItem = createReadingListItem('B');
+    book.finished = true;
+    book.finishedDate = new Date().toISOString();
+    component.markAsRead(book);
+    expect(store.dispatch).toHaveBeenCalled();
+  });
 });
