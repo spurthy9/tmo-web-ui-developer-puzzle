@@ -5,13 +5,24 @@ import { createBook, SharedTestingModule } from '@tmo/shared/testing';
 import { BooksFeatureModule } from '@tmo/books/feature';
 import { BookSearchComponent } from './book-search.component';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { addToReadingList, clearSearch, getAllBooks, getBooksError, getBooksLoaded, searchBooks } from '@tmo/books/data-access';
+import {
+  addToReadingList,
+  clearSearch,
+  getAllBooks,
+  getBooksError,
+  getBooksLoaded, removeFromReadingList,
+  searchBooks
+} from '@tmo/books/data-access';
 import { Book } from '@tmo/shared/models';
+import { OverlayContainer } from '@angular/cdk/overlay';
 
 describe('ProductsListComponent', () => {
   let component: BookSearchComponent;
   let fixture: ComponentFixture<BookSearchComponent>;
   let store: MockStore;
+  let oc: OverlayContainer;
+  let overlayContainerElement: HTMLElement;
+  let spyTest: any;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -19,6 +30,8 @@ describe('ProductsListComponent', () => {
       providers: [provideMockStore({ initialState: { books: { entities: [] } } }),]
     }).compileComponents();
     store = TestBed.inject(MockStore);
+    oc = TestBed.inject(OverlayContainer);
+    overlayContainerElement = oc.getContainerElement();
   }));
 
   afterEach(() => {
@@ -32,7 +45,7 @@ describe('ProductsListComponent', () => {
     store.overrideSelector(getBooksError, {
       error: {}
     });
-    spyOn(store, 'dispatch').and.callThrough();
+    spyTest = spyOn(store, 'dispatch').and.callThrough();
     fixture.detectChanges();
   });
 
@@ -40,12 +53,11 @@ describe('ProductsListComponent', () => {
     expect(component).toBeDefined();
   });
 
-  it('should return formatted data', () => {
-    expect(component.formatDate('08/22/2020')).toBe('8/22/2020');
-  })
-
-  it('should return undefined', () => {
-    expect(component.formatDate('')).toBeUndefined();
+  it('formatDate() : should return formatted data', () => {
+    let result = component.formatDate('08/22/2020');
+    expect(result).toBe('8/22/2020');
+    result = component.formatDate('');
+    expect(result).toBeUndefined();
   })
 
   it('should add book to reading list', () => {
@@ -73,6 +85,7 @@ describe('ProductsListComponent', () => {
       searchBooks({ term: 'testing' })
     );
   });
+
   it('should dispatch clear search if no search term is exists', () => {
     component.searchForm.controls.term.setValue('');
     store.refreshState();
@@ -81,6 +94,16 @@ describe('ProductsListComponent', () => {
     expect(store.dispatch).toHaveBeenCalledWith(
       clearSearch()
     );
+  });
+
+  it('should trigger snackBar to undo the addReadList', () => {
+    const book: Book = createBook('B');
+    component.addBookToReadingList(book);
+    const buttonElement: HTMLElement = overlayContainerElement.querySelector('.mat-simple-snackbar-action > button');
+    buttonElement?.click();
+    expect(store.dispatch).toHaveBeenCalledWith(addToReadingList({ book }));
+    expect(store.dispatch).toHaveBeenCalledTimes(2);
+    expect(spyTest).toHaveBeenCalledWith(removeFromReadingList({item: {...book, bookId: 'B'}}));
   });
 
 });
