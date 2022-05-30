@@ -11,6 +11,7 @@ import {
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
 import { Observable } from 'rxjs';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 
 @Component({
   selector: 'tmo-book-search',
@@ -37,8 +38,12 @@ export class BookSearchComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.searchForm.get("term").valueChanges.subscribe(newVal => {
-      if(!newVal) this.store.dispatch(clearSearch());
+    this.searchForm.get("term").valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(newVal => {
+      if (newVal) {
+        this.store.dispatch(searchBooks({ term: newVal }));
+      } else {
+        this.store.dispatch(clearSearch());
+      }
     })
   }
 
@@ -54,15 +59,5 @@ export class BookSearchComponent implements OnInit {
 
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');
-    this.searchBooks();
-  }
-
-  searchBooks() {
-    const searchText = this.searchTerm;
-    if (searchText) {
-      this.store.dispatch(searchBooks({ term: searchText }));
-    } else {
-      this.store.dispatch(clearSearch());
-    }
   }
 }
