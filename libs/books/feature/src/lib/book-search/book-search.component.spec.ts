@@ -40,12 +40,11 @@ describe('ProductsListComponent', () => {
     expect(component).toBeDefined();
   });
 
-  it('should return formatted data', () => {
-    expect(component.formatDate('08/22/2020')).toBe('8/22/2020');
-  })
-
-  it('should return undefined', () => {
-    expect(component.formatDate('')).toBeUndefined();
+  it('formatDate() : should return formatted data', () => {
+    let result = component.formatDate('08/22/2020');
+    expect(result).toBe('8/22/2020');
+    result = component.formatDate('');
+    expect(result).toBeUndefined();
   })
 
   it('should add book to reading list', () => {
