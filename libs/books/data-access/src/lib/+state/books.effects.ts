@@ -5,6 +5,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Book } from '@tmo/shared/models';
 import * as BooksActions from './books.actions';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class BooksEffects {
@@ -13,8 +14,13 @@ export class BooksEffects {
       ofType(BooksActions.searchBooks),
       switchMap((action) =>
         this.http.get<Book[]>(`/api/books/search?q=${action.term}`).pipe(
-          map((data) => BooksActions.searchBooksSuccess({ books: data })),
-          catchError((error) => of(BooksActions.searchBooksFailure({ error })))
+          map((data) => {
+            return BooksActions.searchBooksSuccess({ books: data })
+          }),
+          catchError((error) => {
+            this.store.dispatch(BooksActions.clearSearch());
+            return of(BooksActions.searchBooksFailure({ error }))
+          })
         )
       )
     )
@@ -22,6 +28,7 @@ export class BooksEffects {
 
   constructor(
     private readonly actions$: Actions,
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
+    private readonly store: Store
   ) {}
 }
