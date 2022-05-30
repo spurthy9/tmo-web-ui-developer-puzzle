@@ -51,6 +51,30 @@ describe('Books Reducer', () => {
 
       expect(result.ids).toEqual(['A', 'B', 'C']);
     });
+
+    it('should load error for reading list', () => {
+      const action = ReadingListActions.loadReadingListError({ error:'Error' });
+      const result: State = reducer(initialState, action);
+      expect(result.error).toBe('Error');
+    });
+
+    it('should add to reading list', () => {
+      const action = ReadingListActions.addToReadingList({ book: createBook('F') });
+      const result: State = reducer(initialState, action);
+      expect(result.ids.length).toEqual(1);
+    });
+
+    it('should remove from reading list', () => {
+      const list = [
+        createReadingListItem('A'),
+        createReadingListItem('B'),
+        createReadingListItem('C')
+      ];
+      ReadingListActions.loadReadingListSuccess({ list });
+      const action = ReadingListActions.removeFromReadingList({ item: createReadingListItem('F') });
+      const result: State = reducer(initialState, action);
+      expect(result.ids.length).toEqual(0);
+    });
   });
 
   describe('unknown action', () => {

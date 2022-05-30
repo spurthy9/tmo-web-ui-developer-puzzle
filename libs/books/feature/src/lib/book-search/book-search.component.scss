@@ -68,5 +68,29 @@ form {
   justify-content: center;
   min-height: 50vh;
   font-size: 1.5rem;
-  color: $gray40;
+  color: $black;
+}
+.btn-link{
+  border: 0;
+  background: none;
+  color: $pink-accent;
+  cursor: pointer;
+}
+.mat-spinner {
+  position: relative;
+  margin-left: 50%;
+  margin-right: 50%;
+}
+.alert-danger{
+   color: $pink-dark01;
+   background-color: $gray50;
+   border-color: $pink-light;
+ }
+
+.alert {
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
 }

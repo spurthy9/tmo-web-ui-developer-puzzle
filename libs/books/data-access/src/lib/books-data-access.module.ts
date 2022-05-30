@@ -10,7 +10,10 @@ import { ReadingListEffects } from './+state/reading-list.effects';
 @NgModule({
   imports: [
     CommonModule,
-    StoreModule.forFeature(fromBooks.BOOKS_FEATURE_KEY, fromBooks.reducer),
+    StoreModule.forFeature(
+        fromBooks.BOOKS_FEATURE_KEY,
+        fromBooks.reducer
+    ),
     StoreModule.forFeature(
       fromReadingList.READING_LIST_FEATURE_KEY,
       fromReadingList.reducer
