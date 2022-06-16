@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBook, SharedTestingModule } from '@tmo/shared/testing';
 
@@ -40,12 +40,11 @@ describe('ProductsListComponent', () => {
     expect(component).toBeDefined();
   });
 
-  it('should return formatted data', () => {
-    expect(component.formatDate('08/22/2020')).toBe('8/22/2020');
-  })
-
-  it('should return undefined', () => {
-    expect(component.formatDate('')).toBeUndefined();
+  it('formatDate() : should return formatted data', () => {
+    let result = component.formatDate('08/22/2020');
+    expect(result).toBe('8/22/2020');
+    result = component.formatDate('');
+    expect(result).toBeUndefined();
   })
 
   it('should add book to reading list', () => {
@@ -54,33 +53,34 @@ describe('ProductsListComponent', () => {
     expect(store.dispatch).toHaveBeenCalledWith(addToReadingList({ book }));
   });
 
-  it('should  search books with the search example', () => {
-    component.searchExample();
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
-    expect(store.dispatch).toHaveBeenCalledWith(
-      searchBooks({ term: 'javascript' })
-    );
-  });
-
-  it('should  search books with the search term', () => {
-    component.searchForm.controls.term.setValue('testing');
+  it('should  search books with the search term', fakeAsync(() => {
+    component.searchForm.controls.term.setValue('testing1');
+    tick(500);
     store.overrideSelector(getBooksLoaded, true);
     store.overrideSelector(getAllBooks, [{ ...createBook('A'), isAdded: false }]);
     store.refreshState();
-    component.searchBooks();
     expect(store.dispatch).toHaveBeenCalledTimes(1);
     expect(store.dispatch).toHaveBeenCalledWith(
-      searchBooks({ term: 'testing' })
+      searchBooks({ term: 'testing1' })
     );
-  });
-  it('should dispatch clear search if no search term is exists', () => {
+  }));
+
+  it('should dispatch clear search if no search term is exists', fakeAsync(() => {
     component.searchForm.controls.term.setValue('');
+    tick(500);
     store.refreshState();
-    component.searchBooks();
-    expect(store.dispatch).toHaveBeenCalledTimes(2);
     expect(store.dispatch).toHaveBeenCalledWith(
       clearSearch()
     );
-  });
+  }));
+
+  it('should  search books with the search example', fakeAsync(() => {
+    fixture.detectChanges();
+    component.searchExample();
+    tick(500);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      searchBooks({ term: 'javascript' })
+    );
+  }));
 
 });
